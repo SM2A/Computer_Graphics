@@ -42,56 +42,32 @@ GLfloat camAngleX, camAngleY, camAngleZ;
 GLenum Mouse;
 int mousePrevX, mousePrevY;
 
-GLfloat bicyclePosX, bicyclePosZ, bicycleDirection;
+GLfloat bicyclePosX, bicyclePosY, bicycleDirection;
 
 void ZCylinder(GLfloat radius, GLfloat length);
-
 void XCylinder(GLfloat radius, GLfloat length);
-
 void drawFrame();
-
 void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth, GLfloat tooth_depth);
-
 void drawChain();
-
 void drawPedals();
-
 void drawTyre();
-
 void drawSeat();
-
 void printInstruction();
-
 void init();
-
 void reset();
-
 void display();
-
 void idle();
-
 void updateScene();
-
 void landmarks();
-
 void special(int key, int x, int y);
-
 void keyboard(unsigned char key, int x, int y);
-
 void mouse(int button, int state, int x, int y);
-
 void motion(int x, int y);
-
 void reshape(int w, int h);
-
 void glSetupFuncs();
-
 GLfloat Abs(GLfloat);
-
 GLfloat degrees(GLfloat);
-
 GLfloat radians(GLfloat);
-
 GLfloat angleSum(GLfloat, GLfloat);
 
 /******************************************
@@ -175,7 +151,7 @@ void updateScene() {
     xDelta = speed * cos(radians(bicycleDirection + steering));
     zDelta = speed * sin(radians(bicycleDirection + steering));
     bicyclePosX += xDelta;
-    bicyclePosZ -= zDelta;
+    bicyclePosY -= zDelta;
     pedalAngle = degrees(angleSum(radians(pedalAngle), speed / WHEEL_RADIUS));
 
     // we'll be using sin(steering) and cos(steering) more than once
@@ -630,6 +606,12 @@ void drawChain() {
 }
 
 void drawSeat() {
+
+
+
+
+
+
     /*********************************
     *   Draw the top of the seat
     **********************************/
@@ -811,11 +793,10 @@ void drawTyre() {
 }
 
 void init() {
-    GLfloat mat_specular[] = {1.0, 1.0, 1.0, 1.0};
     GLfloat mat_shininess[] = {100.0};
-    GLfloat light_directional[] = {1.0, 1.0, 1.0, 1.0};
-    GLfloat light_positional[] = {1.0, 1.0, 1.0, 0.0};
     GLfloat light_diffuse[] = {1.0, 1.0, 1.0};
+    GLfloat mat_specular[] = {1.0, 1.0, 1.0, 1.0};
+    GLfloat light_directional[] = {1.0, 1.0, 1.0, 1.0};
 
     reset();
 
@@ -881,7 +862,7 @@ void display() {
     *   Move the cycle.
     ****************************/
     glPushMatrix();
-    glTranslatef(bicyclePosX, 0.0f, bicyclePosZ);
+    glTranslatef(bicyclePosX, 0.0f, bicyclePosY);
     glRotatef(bicycleDirection, 0.0f, 1.0f, 0.0f);
 
     drawFrame();
@@ -896,18 +877,6 @@ void display() {
     gluLookAt(camPosX, camPosY, camPosZ, camPosX, 0.0, 0.0, 0.0, 1.0, 0.0);
 
     glutSwapBuffers();
-}
-
-/************************
-*   Returns the absolute
-*   value of a given
-*   float number
-************************/
-GLfloat Abs(GLfloat a) {
-    if (a < 0.0f)
-        return -a;
-    else
-        return a;
 }
 
 /************************
@@ -956,17 +925,21 @@ void special(int key, int x, int y) {
     glutPostRedisplay();
 }
 
-/*****************************
-*   Reset The scene
-*****************************/
 void reset() {
-    camAngleX = camAngleY = camAngleZ = 0.0f;
-    pedalAngle = steering = 0.0f;
+    camAngleX = 0.0f;
+    camAngleY = 0.0f;
+    camAngleZ = 0.0f;
+    pedalAngle = 0.0f;
+    steering = 0.0f;
     Mouse = GLUT_UP;
-    pedalAngle = speed = steering = 0.0f;
-    camPosX = camPosY = 0.0f;
+    pedalAngle = 0.0f;
+    speed = 0.0f;
+    steering = 0.0f;
+    camPosX = 0.0f;
+    camPosY = 0.0f;
     camPosZ = 5.0f;
-    bicyclePosX = bicyclePosZ = 0.0f;
+    bicyclePosX = 0.0f;
+    bicyclePosY = 0.0f;
     bicycleDirection = 0.0f;
 }
 
