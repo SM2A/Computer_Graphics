@@ -30,7 +30,7 @@
 #define HANDLE_LIMIT   70.0f
 
 #define INC_STEERING   2.0f
-#define INC_SPEED      0.001f
+#define INC_SPEED      0.0005f
 
 using namespace std;
 
@@ -47,8 +47,8 @@ GLfloat bicyclePosX, bicyclePosY, bicycleDirection;
 void ZCylinder(GLfloat radius, GLfloat length);
 void XCylinder(GLfloat radius, GLfloat length);
 void drawFrame();
-void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth, GLfloat tooth_depth);
-void drawChain();
+void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth, GLfloat tooth_depth); // Done
+void drawChain(); // Done
 void drawPedals(); // Done
 void drawTyre(); // Done
 void drawSeat(); // Done
@@ -60,9 +60,9 @@ void idle();
 void updateScene();
 void landmarks();
 void special(int key, int x, int y);
-void keyboard(unsigned char key, int x, int y);
-void mouse(int button, int state, int x, int y);
-void motion(int x, int y);
+void keyboard(unsigned char key, int x, int y); // Done
+void mouse(int button, int state, int x, int y); // Done
+void motion(int x, int y); // Done
 void reshape(int w, int h);
 void setupCallBacks(); // Done
 GLfloat degrees(GLfloat);
@@ -153,7 +153,7 @@ void updateScene() {
     zDelta = speed * sin(radians(bicycleDirection + steering));
     bicyclePosX += xDelta;
     bicyclePosY -= zDelta;
-    pedalAngle = degrees(angleSum(radians(pedalAngle), speed / WHEEL_RADIUS));
+    pedalAngle = degrees(angleSum(radians(pedalAngle), speed / WHEEL_RADIUS*0.5));
 
     // we'll be using sin(steering) and cos(steering) more than once
     // so calculate the values one time for efficiency
@@ -445,41 +445,29 @@ void drawFrame() {
     glPopMatrix();
 }
 
-// Portions of this code have been borrowed from Brian Paul's Mesa
-// distribution.
-/*
-* Draw a gear wheel.  You'll probably want to call this function when
-* building a display list since we do a lot of trig here.
-*
-* Input:  inner_radius - radius of hole at center
-*      outer_radius - radius at center of teeth
-*      width - width of gear
-*      teeth - number of teeth
-*      tooth_depth - depth of tooth
-*/
+void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth, GLfloat tooth_depth) {
 
-void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
-          GLint teeth, GLfloat tooth_depth) {
     GLint i;
     GLfloat r0, r1, r2;
     GLfloat angle, da;
     GLfloat u, v, len;
-    const double pi = 3.14159264;
 
     r0 = inner_radius;
     r1 = outer_radius - tooth_depth / 2.0;
     r2 = outer_radius + tooth_depth / 2.0;
 
-    da = 2.0 * pi / teeth / 4.0;
+    da = 2.0 * M_PI / teeth / 4.0;
+
+    glTranslatef(0.0f, 0.0f, 0.12f);
+    glColor3f(0.0f, 0.0f, 0.0f);
 
     glShadeModel(GL_FLAT);
 
     glNormal3f(0.0, 0.0, 1.0);
 
-    /* draw front face */
     glBegin(GL_QUAD_STRIP);
     for (i = 0; i <= teeth; i++) {
-        angle = i * 2.0 * pi / teeth;
+        angle = i * 2.0 * M_PI / teeth;
         glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
         glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5);
         glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
@@ -487,11 +475,10 @@ void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     }
     glEnd();
 
-    /* draw front sides of teeth */
     glBegin(GL_QUADS);
-    da = 2.0 * pi / teeth / 4.0;
+    da = 2.0 * M_PI / teeth / 4.0;
     for (i = 0; i < teeth; i++) {
-        angle = i * 2.0 * pi / teeth;
+        angle = i * 2.0 * M_PI / teeth;
 
         glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5);
         glVertex3f(r2 * cos(angle + da), r2 * sin(angle + da), width * 0.5);
@@ -503,10 +490,9 @@ void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
     glNormal3f(0.0, 0.0, -1.0);
 
-    /* draw back face */
     glBegin(GL_QUAD_STRIP);
     for (i = 0; i <= teeth; i++) {
-        angle = i * 2.0 * pi / teeth;
+        angle = i * 2.0 * M_PI / teeth;
         glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5);
         glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5);
         glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da), -width * 0.5);
@@ -514,11 +500,10 @@ void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     }
     glEnd();
 
-    /* draw back sides of teeth */
     glBegin(GL_QUADS);
-    da = 2.0 * pi / teeth / 4.0;
+    da = 2.0 * M_PI / teeth / 4.0;
     for (i = 0; i < teeth; i++) {
-        angle = i * 2.0 * pi / teeth;
+        angle = i * 2.0 * M_PI / teeth;
 
         glVertex3f(r1 * cos(angle + 3 * da), r1 * sin(angle + 3 * da), -width * 0.5);
         glVertex3f(r2 * cos(angle + 2 * da), r2 * sin(angle + 2 * da), -width * 0.5);
@@ -527,11 +512,9 @@ void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     }
     glEnd();
 
-
-    /* draw outward faces of teeth */
     glBegin(GL_QUAD_STRIP);
     for (i = 0; i < teeth; i++) {
-        angle = i * 2.0 * pi / teeth;
+        angle = i * 2.0 * M_PI / teeth;
 
         glVertex3f(r1 * cos(angle), r1 * sin(angle), width * 0.5);
         glVertex3f(r1 * cos(angle), r1 * sin(angle), -width * 0.5);
@@ -562,37 +545,27 @@ void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
 
     glShadeModel(GL_SMOOTH);
 
-    /* draw inside radius cylinder */
     glBegin(GL_QUAD_STRIP);
     for (i = 0; i <= teeth; i++) {
-        angle = i * 2.0 * pi / teeth;
+        angle = i * 2.0 * M_PI / teeth;
         glNormal3f(-cos(angle), -sin(angle), 0.0);
         glVertex3f(r0 * cos(angle), r0 * sin(angle), -width * 0.5);
         glVertex3f(r0 * cos(angle), r0 * sin(angle), width * 0.5);
     }
     glEnd();
-
 }
 
-/******************************************
-*   Could not model the exact chain
-*   Think it eats up a lot of power if
-*   approximated by a lot of spheres
-*   So approximated with the stippled
-*   lines instead
-******************************************/
 void drawChain() {
     GLfloat depth;
     static int mode = 0;
 
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glEnable(GL_LINE_STIPPLE);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glTranslatef(0.0f, 0.0f, 0.1f);
+    glEnable(GL_LINE);
     mode = (mode + 1) % 2;
 
-    if (mode == 0 && speed > 0)
-        glLineStipple(1, 0x1c47);
-    else if (mode == 1 && speed > 0)
-        glLineStipple(1, 0x00FF);
+    if (mode == 0 && speed > 0) glLineStipple(1, 0x1c47);
+    else if (mode == 1 && speed > 0) glLineStipple(1, 0x00FF);
 
     glBegin(GL_LINES);
     for (depth = 0.06f; depth <= 0.12f; depth += 0.01f) {
@@ -604,6 +577,7 @@ void drawChain() {
     }
     glEnd();
     glDisable(GL_LINE_STIPPLE);
+    glTranslatef(0.0f, 0.0f, -0.1f);
 }
 
 void drawSeat() {
@@ -925,8 +899,6 @@ void reset() {
 }
 
 void keyboard(unsigned char key, int x, int y) {
-    GLfloat r = 0.0f;
-
     switch (key) {
         case 'r':
         case 'R':
@@ -954,44 +926,11 @@ void keyboard(unsigned char key, int x, int y) {
             exit(1);
     }
 
-    /********************************
-    *   Where is my Cycle?
-    *********************************/
-
-    /*********************************
-    *   When you rotate the handle the
-    *   cycle as a whole does not rotate
-    *   at once immediately.
-    *   For each unit of time, the
-    *   handle slowly begins to align
-    *   with the rest of the body of the
-    *   cycle.
-    *   Tough this is a gross approximation
-    *   it's workig fine now, maybe i'll
-    *   get some bugs. :<
-    *   I Think that the rate at which the
-    *   handle aligns with the body is
-    *   dependant on the speed too!!
-    *   The rate is given by 'delta'
-    *   and the speed is given by 'speed'
-    *   Now there should be no problems
-    ************************************/
-
-    /***********************
-    *   Check out the error
-    *   conditions  ;>
-    ***********************/
     pedalAngle += speed;
-    if (speed < 0.0f)
-        speed = 0.0f;
-    if (pedalAngle < 0.0f)
-        pedalAngle = 0.0f;
-    if (pedalAngle >= 360.0f)
-        pedalAngle -= 360.0f;
+    if (speed < 0.0f) speed = 0.0f;
+    if (pedalAngle < 0.0f) pedalAngle = 0.0f;
+    if (pedalAngle >= 360.0f) pedalAngle -= 360.0f;
 
-    /******************
-    *   Go! Display ;)
-    *******************/
     glutPostRedisplay();
 }
 
