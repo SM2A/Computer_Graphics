@@ -49,7 +49,7 @@ void XCylinder(GLfloat radius, GLfloat length);
 void drawFrame();
 void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth, GLfloat tooth_depth);
 void drawChain();
-void drawPedals();
+void drawPedals(); // Done
 void drawTyre(); // Done
 void drawSeat(); // Done
 void printInstruction(); // Done
@@ -695,67 +695,41 @@ void drawSeat() {
 }
 
 void drawPedals() {
-    glColor3f(0.0f, 0.0f, 1.0f);
-    /***************************
-    *   Lets draw the two pedals
-    *   offset from the center
-    *   of the frame.
-    ****************************/
+    glColor3f(0.0f, 0.0f, 0.0f);
 
-    /*****************************
-    *   First draw the one visible
-    *   to the viewer
-    ******************************/
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 0.105f);
     glRotatef(-pedalAngle, 0.0f, 0.0f, 1.0f);
-    glTranslatef(0.25f, 0.0f, 0.0f);
-    /*************************
-    *   Draw the pedal rod
-    *************************/
+    glTranslatef(0.25f, 0.0f, 0.15f);
+
     glPushMatrix();
-    glScalef(0.5f, 0.1f, 0.1f);
+    glScalef(0.5f, 0.05f, 0.1f);
     glutSolidCube(1.0f);
     glPopMatrix();
 
-    /************************
-    *   Draw the resting pad
-    ************************/
     glPushMatrix();
     glTranslatef(0.25f, 0.0f, 0.15f);
     glRotatef(pedalAngle, 0.0f, 0.0f, 1.0f);
-    glScalef(0.2f, 0.02f, 0.3f);
+    glScalef(0.2f, 0.08f, 0.3f);
     glutSolidCube(1.0f);
     glPopMatrix();
 
     glPopMatrix();
 
-    /*******************************
-    *   Draw the one on the other
-    *   side  of the frame
-    *******************************/
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -0.105f);
+    glTranslatef(0.0f, 0.0f, -0.23f);
     glRotatef(180.0f - pedalAngle, 0.0f, 0.0f, 1.0f);
     glTranslatef(0.25f, 0.0f, 0.0f);
 
-    /***************************
-    *   Now again draw the pedal
-    *   rod
-    ****************************/
     glPushMatrix();
-    glScalef(0.5f, 0.1f, 0.1f);
+    glScalef(0.5f, 0.05f, 0.1f);
     glutSolidCube(1.0f);
     glPopMatrix();
 
-    /****************************
-    *   Draw the resting pad of
-    *   the pedal
-    *****************************/
     glPushMatrix();
     glTranslatef(0.25f, 0.0f, -0.15f);
     glRotatef(pedalAngle - 180.0f, 0.0f, 0.0f, 1.0f);
-    glScalef(0.2f, 0.02f, 0.3f);
+    glScalef(0.2f, 0.08f, 0.3f);
     glutSolidCube(1.0f);
     glPopMatrix();
 
