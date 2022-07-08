@@ -50,7 +50,7 @@ void drawFrame();
 void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth, GLfloat tooth_depth);
 void drawChain();
 void drawPedals();
-void drawTyre();
+void drawTyre(); // Done
 void drawSeat(); // Done
 void printInstruction(); // Done
 void init();
@@ -64,7 +64,7 @@ void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 void reshape(int w, int h);
-void glSetupFuncs();
+void setupCallBacks(); // Done
 GLfloat degrees(GLfloat);
 GLfloat radians(GLfloat);
 GLfloat angleSum(GLfloat, GLfloat);
@@ -107,7 +107,9 @@ int main(int argc, char *argv[]) {
 
     init();
 
-    glSetupFuncs();
+    setupCallBacks();
+
+    glClearColor(0.0, 1.0, 1.0, 1.0);
 
     glutMainLoop();
 
@@ -763,24 +765,22 @@ void drawPedals() {
 }
 
 void drawTyre() {
-    int i;
-    //   Draw The Rim
-    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glColor3f(0.0f, 0.0f, 0.0f);
     glutSolidTorus(0.06f, 0.92f, 4, 30);
-    //   Draw The Central Cylinder
-    //   Length of cylinder  0.12f
-    glColor3f(1.0f, 1.0f, 0.5f);
+
+    glColor3f(0.0f, 0.0f, 0.0f);
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, -0.06f);
-    ZCylinder(0.02f, 0.12f);
+    ZCylinder(0.08f, 0.12f);
     glPopMatrix();
-    glutSolidTorus(0.02f, 0.02f, 3, 20);
+    glutSolidTorus(0.08f, 0.05f, 3, 20);
 
-    //   Draw The Spokes
-    glColor3f(1.0f, 1.0f, 1.0f);
-    for (i = 0; i < SPOKES_COUNT; ++i) {
+    glColor3f(0.0f, 0.0f, 1.0f);
+    for (int i = 0; i < SPOKES_COUNT; ++i) {
         glPushMatrix();
         glRotatef(i * SPOKE_ANGLE, 0.0f, 0.0f, 1.0f);
+        glLineWidth(2.0f);
         glBegin(GL_LINES);
         glVertex3f(0.0f, 0.02f, 0.0f);
         glVertex3f(0.0f, 0.86f, 0.0f);
@@ -788,7 +788,6 @@ void drawTyre() {
         glPopMatrix();
     }
 
-    //   Draw The Tyre
     glColor3f(0.0f, 0.0f, 0.0f);
     glutSolidTorus(TUBE_WIDTH, WHEEL_RADIUS, 10, 30);
     glColor3f(1.0f, 0.0f, 0.0f);
@@ -1071,7 +1070,7 @@ void reshape(int w, int h) {
     gluLookAt(camPosX, camPosY, camPosZ, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
-void glSetupFuncs() {
+void setupCallBacks() {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutIdleFunc(idle);
