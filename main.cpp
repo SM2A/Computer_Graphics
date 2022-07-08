@@ -1,6 +1,6 @@
-#include<cmath>
-#include<iostream>
-#include<GL/glut.h>
+#include <cmath>
+#include <iostream>
+#include <GL/glut.h>
 
 #define WINDOW_WIDTH      600
 #define WINDOW_HEIGHT      600
@@ -51,8 +51,8 @@ void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth
 void drawChain();
 void drawPedals();
 void drawTyre();
-void drawSeat();
-void printInstruction();
+void drawSeat(); // Done
+void printInstruction(); // Done
 void init();
 void reset();
 void display();
@@ -65,7 +65,6 @@ void mouse(int button, int state, int x, int y);
 void motion(int x, int y);
 void reshape(int w, int h);
 void glSetupFuncs();
-GLfloat Abs(GLfloat);
 GLfloat degrees(GLfloat);
 GLfloat radians(GLfloat);
 GLfloat angleSum(GLfloat, GLfloat);
@@ -607,43 +606,48 @@ void drawChain() {
 
 void drawSeat() {
 
-
-
-
-
-
-    /*********************************
-    *   Draw the top of the seat
-    **********************************/
     glBegin(GL_POLYGON);
     glVertex3f(-0.1f, 1.0f, -0.5f);
     glVertex3f(1.0f, 1.0f, -0.3f);
+    glVertex3f(1.1f, 1.0f, -0.1f);
+    glVertex3f(1.1f, 1.0f, 0.1f);
     glVertex3f(1.0f, 1.0f, 0.3f);
     glVertex3f(-0.1f, 1.0f, 0.5f);
     glVertex3f(-0.5f, 1.0f, 1.0f);
+    glVertex3f(-0.6f, 1.0f, 1.1f);
+    glVertex3f(-0.7f, 1.0f, 1.2f);
+    glVertex3f(-0.8f, 1.0f, 1.2f);
+    glVertex3f(-0.9f, 1.0f, 1.1f);
     glVertex3f(-1.0f, 1.0f, 1.0f);
     glVertex3f(-1.0f, 1.0f, -1.0f);
+    glVertex3f(-0.9f, 1.0f, -1.1f);
+    glVertex3f(-0.8f, 1.0f, -1.2f);
+    glVertex3f(-0.7f, 1.0f, -1.2f);
+    glVertex3f(-0.6f, 1.0f, -1.1f);
     glVertex3f(-0.5f, 1.0f, -1.0f);
     glEnd();
 
-    /**********************************
-    *   Draw the bottom base part of the
-    *   seat
-    ************************************/
     glBegin(GL_POLYGON);
     glVertex3f(-0.1f, -1.0f, -0.5f);
     glVertex3f(1.0f, -1.0f, -0.3f);
+    glVertex3f(1.1f, -1.0f, -0.1f);
+    glVertex3f(1.1f, -1.0f, 0.1f);
     glVertex3f(1.0f, -1.0f, 0.3f);
     glVertex3f(-0.1f, -1.0f, 0.5f);
     glVertex3f(-0.5f, -1.0f, 1.0f);
+    glVertex3f(-0.6f, -1.0f, 1.1f);
+    glVertex3f(-0.7f, -1.0f, 1.2f);
+    glVertex3f(-0.8f, -1.0f, 1.2f);
+    glVertex3f(-0.9f, -1.0f, 1.1f);
     glVertex3f(-1.0f, -1.0f, 1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
+    glVertex3f(-0.9f, -1.0f, -1.1f);
+    glVertex3f(-0.8f, -1.0f, -1.2f);
+    glVertex3f(-0.7f, -1.0f, -1.2f);
+    glVertex3f(-0.6f, -1.0f, -1.1f);
     glVertex3f(-0.5f, -1.0f, -1.0f);
     glEnd();
 
-    /**********************
-    *   Draw the sides!
-    ***********************/
     glBegin(GL_QUADS);
     glVertex3f(1.0f, 1.0f, -0.3f);
     glVertex3f(1.0f, 1.0f, 0.3f);
@@ -686,8 +690,6 @@ void drawSeat() {
     glVertex3f(-1.0f, -1.0f, 1.0f);
 
     glEnd();
-
-
 }
 
 void drawPedals() {
@@ -874,7 +876,7 @@ void display() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(camPosX, camPosY, camPosZ, camPosX, 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt(camPosX, camPosY, camPosZ, camPosX, camPosY, 0.0, 0.0, 1.0, 0.0);
 
     glutSwapBuffers();
 }
@@ -920,6 +922,12 @@ void special(int key, int x, int y) {
             break;
         case GLUT_KEY_RIGHT:
             camPosX += 0.1f;
+            break;
+        case GLUT_KEY_PAGE_UP:
+            camPosY += 0.1f;
+            break;
+        case GLUT_KEY_PAGE_DOWN:
+            camPosY -= 0.1f;
             break;
     }
     glutPostRedisplay();
@@ -1044,22 +1052,6 @@ void motion(int x, int y) {
         deltay = mousePrevY - y;
         camAngleX += 0.5 * deltax;
         camAngleY += 0.5 * deltay;
-        if (deltax != 0 && deltay != 0)
-            camAngleZ += 0.5 * sqrt(deltax * deltax + deltay * deltay);
-
-        if (camAngleX < 0)
-            camAngleX += 360.0;
-        if (camAngleY < 0)
-            camAngleY += 360.0;
-        if (camAngleZ < 0)
-            camAngleZ += 360.0;
-
-        if (camAngleX > 360.0)
-            camAngleX -= 360.0;
-        if (camAngleY > 360.0)
-            camAngleY -= 360.0;
-        if (camAngleZ > 360.0)
-            camAngleZ -= 360.0;
     } else {
         Mouse = GLUT_UP;
     }
@@ -1092,14 +1084,14 @@ void glSetupFuncs() {
 }
 
 void printInstruction() {
-    cout<<"CG-2022"<<endl;
-    cout<<"Seyed Mohammad Amin Atyabi"<<endl;
-    cout<<"810198559"<<endl;
-    cout << "'A' to increase the speed" <<endl;
-    cout <<"'S' to decrease the speed" <<endl;
-    cout <<"'D' to turn right" <<endl;
-    cout <<"'A' to turn left" <<endl;
-    cout <<"'R' to reset the scene" <<endl;
-    cout <<"Arrow keys to move the camera" <<endl;
-    cout <<"Mouse to move the scene" <<endl;
+    cout << "CG-2022" << endl;
+    cout << "Seyed Mohammad Amin Atyabi" << endl;
+    cout << "810198559" << endl;
+    cout << "'A' to increase the speed" << endl;
+    cout << "'S' to decrease the speed" << endl;
+    cout << "'D' to turn right" << endl;
+    cout << "'A' to turn left" << endl;
+    cout << "'R' to reset the scene" << endl;
+    cout << "Arrow keys to move the camera" << endl;
+    cout << "Mouse to move the scene" << endl;
 }
