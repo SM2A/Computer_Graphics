@@ -38,7 +38,7 @@ int mousePrevX, mousePrevY;
 GLfloat camPosX, camPosY, camPosZ;
 GLfloat pedalAngle, speed, steering;
 GLfloat camAngleX, camAngleY, camAngleZ;
-GLfloat bicyclePosX, bicyclePosY, bicycleDirection;
+GLfloat bicyclePosX, bicyclePosY, bicyclePosZ, bicycleDirection;
 
 int main(int argc, char *argv[]) {
 
@@ -621,6 +621,31 @@ void landmarks() {
     gluSphere(quad1,30,100,20);
     glPopMatrix();*/
 
+    /*glPushMatrix();
+    glColor3f(0.6,0.4,0.2);
+    glTranslatef(10,0,10);
+    glScaled(5,5,5);
+
+    glBegin(GL_QUADS);
+
+    glVertex3f(1, 0, 1);
+    glVertex3f(1, 0, -1);
+    glVertex3f(-1, 0, -1);
+    glVertex3f(-1, 0, 1);
+
+    glVertex3f(1, 1, 1);
+    glVertex3f(1, 0, -1);
+    glVertex3f(-1, 0, -1);
+    glVertex3f(-1, 1, 1);
+
+    glVertex3f(1, 0, 1);
+    glVertex3f(1, 1, 1);
+    glVertex3f(-1, 0, 1);
+    glVertex3f(-1, 1, 1);
+
+    glEnd();
+    glPopMatrix();*/
+
     glEnable(GL_LIGHTING);
 }
 
@@ -637,7 +662,7 @@ void display() {
     landmarks();
 
     glPushMatrix();
-    glTranslatef(bicyclePosX, 0, bicyclePosY);
+    glTranslatef(bicyclePosX, bicyclePosZ, bicyclePosY);
     glRotatef(bicycleDirection, 0, 1, 0);
 
     drawFrame();
@@ -707,6 +732,7 @@ void reset() {
     camPosZ = 5.0f;
     bicyclePosX = 0;
     bicyclePosY = 0;
+    bicyclePosZ = 0;
     bicycleDirection = 0;
 }
 
