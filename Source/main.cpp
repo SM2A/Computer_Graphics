@@ -711,9 +711,9 @@ void keyboardKey(int key, int x, int y) {
             break;
         case GLUT_KEY_PAGE_DOWN:
             camPosY -= 0.1f;
-            if (camPosY <= 0) camPosY = 0;
             break;
     }
+    if (camPosY <= TUBE_WIDTH) camPosY = 0;
     glutPostRedisplay();
 }
 
@@ -744,13 +744,11 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'a':
         case 'A':
-            if (steering < HANDLE_LIMIT)
-                steering += INC_STEERING;
+            if (steering < HANDLE_LIMIT) steering += INC_STEERING;
             break;
         case 'd':
         case 'D':
-            if (steering > -HANDLE_LIMIT)
-                steering -= INC_STEERING;
+            if (steering > -HANDLE_LIMIT) steering -= INC_STEERING;
             break;
         case 'w':
         case 'W':
@@ -795,13 +793,13 @@ void motion(int x, int y) {
         deltaY = mousePrevY - y;
         camAngleX += 0.5 * deltaX;
         camAngleY += 0.5 * deltaY;
-        if (camAngleY <= 0) camAngleY = 0;
-        if (camAngleY >= 180) camAngleY = 180;
     } else {
         Mouse = GLUT_UP;
     }
     mousePrevX = x;
     mousePrevY = y;
+    if (camAngleY <= 0) camAngleY = 0;
+    if (camAngleY >= 180) camAngleY = 180;
     glutPostRedisplay();
 }
 
