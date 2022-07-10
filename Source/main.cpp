@@ -1,73 +1,42 @@
 #include <cmath>
+#include "static.h"
 #include <iostream>
 #include <GL/glut.h>
 
-#define WINDOW_WIDTH      600
-#define WINDOW_HEIGHT      600
-#define WINDOW_POSITION_X 625
-#define WINDOW_POSITION_Y 200
-#define WINDOW_NAME "CG-2022: Bicycle"
-#define BICYCLE_LENGTH   3.3f
-#define ROD_RADIUS      0.05f
-#define SPOKES_COUNT      20
-#define SPOKE_ANGLE      18
-#define WHEEL_RADIUS   1
-#define TUBE_WIDTH      0.08f
-#define RIGHT_ROD      1.7f
-#define RIGHT_ANGLE      48.0f
-#define MIDDLE_ROD      1.7f
-#define MIDDLE_ANGLE   106.0f
-#define BACK_CONNECTOR   0.5f
-#define LEFT_ANGLE      50
-#define WHEEL_OFFSET   0.11f
-#define WHEEL_LEN      1.1f
-#define TOP_LEN         1.5f
-#define CRANK_ROD      0.7f
-#define CRANK_RODS      1.12f
-#define CRANK_ANGLE      8.0f
-#define HANDLE_ROD      1.2f
-#define FRONT_INCLINE   70
-#define HANDLE_LIMIT   70
-
-#define INC_STEERING   2.0f
-#define INC_SPEED      0.0005f
-
 using namespace std;
 
-GLfloat pedalAngle, speed, steering;
-
-GLfloat camPosX, camPosY, camPosZ;
-GLfloat camAngleX, camAngleY, camAngleZ;
+void init();
+void idle();
+void reset();
+void display();
+void drawSeat();
+void drawTyre();
+void landmarks();
+void drawFrame();
+void drawChain();
+void drawPedals();
+void updateScene();
+void setupCallBacks();
+void motion(int, int);
+void reshape(int, int);
+void printInstruction();
+GLfloat radToDeg(GLfloat);
+GLfloat degToRad(GLfloat);
+void mouse(int, int, int, int);
+void keyboardKey(int, int, int);
+void ZCylinder(GLfloat, GLfloat);
+void XCylinder(GLfloat, GLfloat);
+GLfloat angleSum(GLfloat, GLfloat);
+void keyboard(unsigned char, int, int);
+void gear(GLfloat, GLfloat, GLfloat, GLint, GLfloat);
 
 GLenum Mouse;
 int mousePrevX, mousePrevY;
 
+GLfloat camPosX, camPosY, camPosZ;
+GLfloat pedalAngle, speed, steering;
+GLfloat camAngleX, camAngleY, camAngleZ;
 GLfloat bicyclePosX, bicyclePosY, bicycleDirection;
-
-void init(); // Done
-void idle(); // Done
-void reset(); // Done
-void display(); // Done
-void drawSeat(); // Done
-void drawTyre(); // Done
-void landmarks();
-void drawFrame(); // Done
-void drawChain(); // Done
-void drawPedals(); // Done
-void updateScene(); // Done
-void setupCallBacks(); // Done
-void motion(int, int); // Done
-void reshape(int, int); // Done
-void printInstruction(); // Done
-GLfloat radToDeg(GLfloat); // Done
-GLfloat degToRad(GLfloat); // Done
-void mouse(int, int, int, int); // Done
-void keyboardKey(int, int, int); // Done
-void ZCylinder(GLfloat, GLfloat); // Done
-void XCylinder(GLfloat, GLfloat); // Done
-GLfloat angleSum(GLfloat, GLfloat); // Done
-void keyboard(unsigned char, int, int); // Done
-void gear(GLfloat, GLfloat, GLfloat, GLint, GLfloat); // Done
 
 int main(int argc, char *argv[]) {
 
@@ -682,6 +651,7 @@ void keyboardKey(int key, int x, int y) {
             break;
         case GLUT_KEY_PAGE_DOWN:
             camPosY -= 0.1f;
+            if (camPosY <= 0) camPosY = 0;
             break;
     }
     glutPostRedisplay();
@@ -760,6 +730,8 @@ void motion(int x, int y) {
         deltaY = mousePrevY - y;
         camAngleX += 0.5 * deltaX;
         camAngleY += 0.5 * deltaY;
+        if (camAngleY <= 0) camAngleY = 0;
+        if (camAngleY >= 180) camAngleY = 180;
     } else {
         Mouse = GLUT_UP;
     }

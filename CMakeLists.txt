@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
-add_executable(Bicycle main.cpp)
+add_executable(Bicycle Source/main.cpp Source/static.h)
 
 target_link_libraries(Bicycle ${OPENGL_LIBRARIES})
 target_link_libraries(Bicycle ${GLUT_LIBRARIES})
