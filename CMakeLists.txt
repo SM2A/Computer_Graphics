@@ -10,4 +10,4 @@ add_executable(Bicycle Source/main.cpp Source/static.h)
 
 target_link_libraries(Bicycle ${OPENGL_LIBRARIES})
 target_link_libraries(Bicycle ${GLUT_LIBRARIES})
-target_link_libraries(Bicycle -lopengl32 -lfreeglut)
+target_link_libraries(Bicycle -lopengl32 -lfreeglut -lwinmm)

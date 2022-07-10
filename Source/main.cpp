@@ -2,6 +2,8 @@
 #include "static.h"
 #include <iostream>
 #include <GL/glut.h>
+#include <windows.h>
+#include <mmsystem.h>
 
 using namespace std;
 
@@ -704,6 +706,10 @@ void keyboard(unsigned char key, int x, int y) {
         case 's':
         case 'S':
             speed -= INC_SPEED;
+            break;
+        case 'h':
+        case 'H':
+            PlaySound(TEXT("../Resource/ring.wav"), NULL, SND_FILENAME);
             break;
         case 27:
             exit(1);
