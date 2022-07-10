@@ -11,14 +11,14 @@
 #define ROD_RADIUS      0.05f
 #define SPOKES_COUNT      20
 #define SPOKE_ANGLE      18
-#define WHEEL_RADIUS   1.0f
+#define WHEEL_RADIUS   1
 #define TUBE_WIDTH      0.08f
-#define RIGHT_ROD      1.6f
+#define RIGHT_ROD      1.7f
 #define RIGHT_ANGLE      48.0f
 #define MIDDLE_ROD      1.7f
 #define MIDDLE_ANGLE   106.0f
 #define BACK_CONNECTOR   0.5f
-#define LEFT_ANGLE      50.0f
+#define LEFT_ANGLE      50
 #define WHEEL_OFFSET   0.11f
 #define WHEEL_LEN      1.1f
 #define TOP_LEN         1.5f
@@ -26,8 +26,8 @@
 #define CRANK_RODS      1.12f
 #define CRANK_ANGLE      8.0f
 #define HANDLE_ROD      1.2f
-#define FRONT_INCLINE   70.0f
-#define HANDLE_LIMIT   70.0f
+#define FRONT_INCLINE   70
+#define HANDLE_LIMIT   70
 
 #define INC_STEERING   2.0f
 #define INC_SPEED      0.0005f
@@ -44,54 +44,30 @@ int mousePrevX, mousePrevY;
 
 GLfloat bicyclePosX, bicyclePosY, bicycleDirection;
 
-void ZCylinder(GLfloat radius, GLfloat length);
-void XCylinder(GLfloat radius, GLfloat length);
-void drawFrame();
-void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth, GLfloat tooth_depth); // Done
+void init(); // Done
+void idle(); // Done
+void reset(); // Done
+void display(); // Done
+void drawSeat(); // Done
+void drawTyre(); // Done
+void landmarks();
+void drawFrame(); // Done
 void drawChain(); // Done
 void drawPedals(); // Done
-void drawTyre(); // Done
-void drawSeat(); // Done
-void printInstruction(); // Done
-void init();
-void reset();
-void display();
-void idle();
-void updateScene();
-void landmarks();
-void special(int key, int x, int y);
-void keyboard(unsigned char key, int x, int y); // Done
-void mouse(int button, int state, int x, int y); // Done
-void motion(int x, int y); // Done
-void reshape(int w, int h);
+void updateScene(); // Done
 void setupCallBacks(); // Done
-GLfloat degrees(GLfloat);
-GLfloat radians(GLfloat);
-GLfloat angleSum(GLfloat, GLfloat);
-
-/******************************************
-*           A
-*          1   ========== 2
-*           /\        |  B
-*          /    \       / 5
-*       E /    \D    /
-*        /        \   / C
-*       /        \ /
-*     3 ==========/ 4
-*          F
-*       1    =   212,82
-*       2   =   368,82
-*       5   =   369,94
-*       3   =   112,220
-*       4   =   249,232
-*
-*       214   =   73
-*       124   =   55
-*       142   =   52
-*       143   =   73
-*       134   =   50
-*       431   =   57
-****************************************/
+void motion(int, int); // Done
+void reshape(int, int); // Done
+void printInstruction(); // Done
+GLfloat radToDeg(GLfloat); // Done
+GLfloat degToRad(GLfloat); // Done
+void mouse(int, int, int, int); // Done
+void keyboardKey(int, int, int); // Done
+void ZCylinder(GLfloat, GLfloat); // Done
+void XCylinder(GLfloat, GLfloat); // Done
+GLfloat angleSum(GLfloat, GLfloat); // Done
+void keyboard(unsigned char, int, int); // Done
+void gear(GLfloat, GLfloat, GLfloat, GLint, GLfloat); // Done
 
 int main(int argc, char *argv[]) {
 
@@ -120,328 +96,183 @@ void ZCylinder(GLfloat radius, GLfloat length) {
     GLUquadricObj *cylinder;
     cylinder = gluNewQuadric();
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.0f);
+    glTranslatef(0, 0, 0);
     gluCylinder(cylinder, radius, radius, length, 15, 5);
     glPopMatrix();
 }
 
 void XCylinder(GLfloat radius, GLfloat length) {
     glPushMatrix();
-    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+    glRotatef(90, 0, 1, 0);
     ZCylinder(radius, length);
     glPopMatrix();
 }
 
-// called by idle()
 void updateScene() {
-    GLfloat xDelta, zDelta;
-    GLfloat rotation;
-    GLfloat sin_steering, cos_steering;
+    GLfloat rotation, xDelta, zDelta, sin_steering, cos_steering;
 
-    // if the tricycle is not moving then do nothing
     if (-INC_SPEED < speed && speed < INC_SPEED) return;
+    if (speed < 0) pedalAngle = speed = 0;
 
-    if (speed < 0.0f)
-        pedalAngle = speed = 0.0f;
-
-    // otherwise, calculate the new position of the tricycle
-    // and the amount that each wheel has rotated.
-    // The tricycle has moved "speed*(time elapsed)".
-    // We assume that "(time elapsed)=1".
-
-    xDelta = speed * cos(radians(bicycleDirection + steering));
-    zDelta = speed * sin(radians(bicycleDirection + steering));
+    xDelta = speed * cos(degToRad(bicycleDirection + steering));
+    zDelta = speed * sin(degToRad(bicycleDirection + steering));
     bicyclePosX += xDelta;
     bicyclePosY -= zDelta;
-    pedalAngle = degrees(angleSum(radians(pedalAngle), speed / WHEEL_RADIUS*0.5));
+    pedalAngle = radToDeg(angleSum(degToRad(pedalAngle), speed / WHEEL_RADIUS * 0.5));
 
-    // we'll be using sin(steering) and cos(steering) more than once
-    // so calculate the values one time for efficiency
-    sin_steering = sin(radians(steering));
-    cos_steering = cos(radians(steering));
+    sin_steering = sin(degToRad(steering));
+    cos_steering = cos(degToRad(steering));
 
-    // see the assignment 3 "Hint"
     rotation = atan2(speed * sin_steering, BICYCLE_LENGTH + speed * cos_steering);
-    bicycleDirection = degrees(angleSum(radians(bicycleDirection), rotation));
+    bicycleDirection = radToDeg(angleSum(degToRad(bicycleDirection), rotation));
 }
 
-// angleSum(a,b) = (a+b) MOD 2*PI
-// a and b are two angles (radians)
-//  both between 0 and 2*PI
-GLfloat angleSum(GLfloat a, GLfloat b) {
-    a += b;
-    if (a < 0) return a + 2 * M_PI;
-    else if (a > 2 * M_PI) return a - 2 * M_PI;
-    else return a;
+GLfloat angleSum(GLfloat m, GLfloat n) {
+    m += n;
+    if (m < 0) return m + 2 * M_PI;
+    else if (m > 2 * M_PI) return m - 2 * M_PI;
+    else return m;
 }
 
-/************************************************
-*   Draw the metal frame of the cycle and also
-*   draw the seat and the back wheel with
-*   this.
-*   All these parts are always together in the
-*   same plane.They never move out ot the
-*   PLANE!   ;)
-************************************************/
 void drawFrame() {
-    glColor3f(1.0f, 0.0f, 0.0f);
+    glColor3f(1, 0, 0);
 
-    /********************************
-    *   First draw the all the items
-    *   at the center of the frame.
-    *   Draw the bigger gear,the small
-    *   cylinder acting as the socket
-    *   for the pedals.Also DON'T
-    *   forget to draw the two
-    *   connecting cemtral rods
-    *********************************/
     glPushMatrix();
-    /******************************
-    *   Allow me to draw the BIGGER
-    *   gear and the socket cylinder
-    *******************************/
-    glPushMatrix();
-    /***************************
-    *   Let the gear have the
-    *   green color
-    ***************************/
-    glColor3f(0.0f, 1.0f, 0.0f);
 
-    /**************************
-    *   The gear should be
-    *   outside the frame !!!
-    *   This is the bigger
-    *   GEAR
-    ***************************/
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.06f);
-    glRotatef(-2 * pedalAngle, 0.0f, 0.0f, 1.0f);
+
+    glColor3f(0, 0, 0);
+
+    glPushMatrix();
+    glTranslatef(0, 0, 0.06f);
+    glRotatef(-2 * pedalAngle, 0, 0, 1);
     gear(0.08f, 0.3f, 0.03f, 30, 0.03f);
     glPopMatrix();
-    /***************************
-    *   Restore the color of the
-    *   frame
-    ****************************/
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glTranslatef(0.0f, 0.0f, -0.2f);
-    ZCylinder(0.08f, 0.32f);
+
+    glColor3f(1, 0, 0);
+    glTranslatef(0, 0, -0.25f);
+    ZCylinder(0.08f, 0.47f);
     glPopMatrix();
-    /*****************************
-    *   Lets first draw the
-    *   rightmost rod of the frame
-    *******************************/
-    glRotatef(RIGHT_ANGLE, 0.0f, 0.0f, 1.0f);
+
+    glRotatef(RIGHT_ANGLE, 0, 0, 1);
     XCylinder(ROD_RADIUS, RIGHT_ROD);
 
-    /*******************************
-    *   Now draw the centre rod of
-    *   the frame which also supports
-    *   the seat
-    *********************************/
-    glRotatef(MIDDLE_ANGLE - RIGHT_ANGLE, 0.0f, 0.0f, 1.0f);
+    glRotatef(MIDDLE_ANGLE - RIGHT_ANGLE, 0, 0, 1);
     XCylinder(ROD_RADIUS, MIDDLE_ROD);
-    /********************************
-    *   We have drawn the support.So
-    *   let's draw the seat with a
-    *   new color
-    *********************************/
-    glColor3f(1.0f, 1.0f, 0.0f);
-    glTranslatef(MIDDLE_ROD, 0.0f, 0.0f);
-    glRotatef(-MIDDLE_ANGLE, 0.0f, 0.0f, 1.0f);
+
+    glColor3f(1, 1, 0);
+    glTranslatef(MIDDLE_ROD, 0, 0);
+    glRotatef(-MIDDLE_ANGLE, 0, 0, 1);
     glScalef(0.3f, ROD_RADIUS, 0.25f);
     drawSeat();
-    /**********************
-    *   Restore the color !
-    ************************/
-    glColor3f(1.0f, 0.0f, 0.0f);
+
+    glColor3f(1, 0, 0);
     glPopMatrix();
-    /*********************************
-    *   Draw the horizontal part of
-    *   the frame.
-    *********************************/
 
-    /*********************************
-    *   Draw the main single rod
-    *   connecting the center of the
-    *   frame to the back wheel of the
-    *   cycle
-    **********************************/
     glPushMatrix();
-    glRotatef(-180.0f, 0.0f, 1.0f, 0.0f);
-    XCylinder(ROD_RADIUS, BACK_CONNECTOR);
+    glRotatef(-180, 0, 1, 0);
 
-    /***********************************
-    *   Draw the two rods on the either
-    *   side of the wheel
-    *   These rods are part of the
-    *   horizontal part of the cycle
-    ************************************/
     glPushMatrix();
-    glTranslatef(0.5f, 0.0f, WHEEL_OFFSET);
-    XCylinder(ROD_RADIUS, WHEEL_RADIUS + TUBE_WIDTH);
+    glTranslatef(-0.05f, 0, WHEEL_OFFSET);
+    glRotatef(-4.0f, 0, 1, 0);
+    XCylinder(ROD_RADIUS, WHEEL_RADIUS + TUBE_WIDTH + 0.6);
     glPopMatrix();
     glPushMatrix();
-    glTranslatef(0.5f, 0.0f, -WHEEL_OFFSET);
-    XCylinder(ROD_RADIUS, WHEEL_RADIUS + TUBE_WIDTH);
+    glTranslatef(-0.05f, 0, -WHEEL_OFFSET);
+    glRotatef(4.0f, 0, 1, 0);
+    XCylinder(ROD_RADIUS, WHEEL_RADIUS + TUBE_WIDTH + 0.6);
     glPopMatrix();
     glPopMatrix();
 
-    /************************************
-    *   Draw the leftmost rods of the
-    *   frame of the cycle
-    *************************************/
     glPushMatrix();
-    glTranslatef(-(BACK_CONNECTOR + WHEEL_RADIUS + TUBE_WIDTH), 0.0f, 0.0f);
-    /********************************
- *   Transalted to the back wheel
- *   position.Why not draw the back
- *   wheel and also the gear ? :))
- **********************************/
+    glTranslatef(-(BACK_CONNECTOR + WHEEL_RADIUS + TUBE_WIDTH), 0, 0);
+
     glPushMatrix();
-    glRotatef(-2 * pedalAngle, 0.0f, 0.0f, 1.0f);
+    glRotatef(-2 * pedalAngle, 0, 0, 1);
     drawTyre();
-    glColor3f(0.0f, 1.0f, 0.0f);
+    glColor3f(0, 1, 0);
     gear(0.03f, 0.15f, 0.03f, 20, 0.03f);
-    glColor3f(1.0f, 0.0f, 0.0f);
+    glColor3f(1, 0, 0);
     glPopMatrix();
-    glRotatef(LEFT_ANGLE, 0.0f, 0.0f, 1.0f);
+    glRotatef(LEFT_ANGLE, 0, 0, 1);
 
-    /************************************
-    *   Draw the two rods on the either
-    *   side of the wheel connecting the
-    *   backwheel and topmost horizontal
-    *   part of the wheel
-    *************************************/
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -WHEEL_OFFSET);
-    XCylinder(ROD_RADIUS, WHEEL_LEN);
+    glTranslatef(0, 0, -WHEEL_OFFSET-0.1);
+    glRotatef(-6.5f, 0, 1, 0);
+    XCylinder(ROD_RADIUS, WHEEL_LEN+0.7);
     glPopMatrix();
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, WHEEL_OFFSET);
-    XCylinder(ROD_RADIUS, WHEEL_LEN);
+    glTranslatef(0, 0, WHEEL_OFFSET+0.1);
+    glRotatef(6.5f, 0, 1, 0);
+    XCylinder(ROD_RADIUS, WHEEL_LEN+0.7);
     glPopMatrix();
 
-    /*****************************
-    *   Draw the single rod of the
-    *   same setup
-    ******************************/
-    glTranslatef(WHEEL_LEN, 0.0f, 0.0f);
-    XCylinder(ROD_RADIUS, CRANK_ROD);
+    glTranslatef(WHEEL_LEN, 0, 0);
 
-    /*****************************
-    *   Now Draw The topmost
-    *   Horizontal rod
-    *****************************/
-    glTranslatef(CRANK_ROD, 0.0f, 0.0f);
-    glRotatef(-LEFT_ANGLE, 0.0f, 0.0f, 1.0f);
+    glTranslatef(CRANK_ROD, 0, 0);
+    glRotatef(-LEFT_ANGLE, 0, 0, 1);
     XCylinder(ROD_RADIUS, TOP_LEN);
 
-    /*******************************
-    *   Now instead of again traversing
-    *   all the way back and again
-    *   forward.WHY NOT DRAW THE
-    *   HANDLE FROM HERE ITSELF?
-    ********************************/
-    /*****************************
-    *   Now draw the handle and
-    *   small support rod which
-    *   is incorporated in the
-    *   frame itself.
-    *   Set y-axis at te required
-    *   incline.
-    ******************************/
-    glTranslatef(TOP_LEN, 0.0f, 0.0f);
-    glRotatef(-FRONT_INCLINE, 0.0f, 0.0f, 1.0f);
+    glTranslatef(TOP_LEN, 0, 0);
+    glRotatef(-FRONT_INCLINE, 0, 0, 1);
 
-    /******************************
-    *   Draw the small rod that acts
-    *   as the socket joining the
-    *   frame and the handle
-    ******************************/
     glPushMatrix();
-    glTranslatef(-0.1f, 0.0f, 0.0f);
+    glTranslatef(-0.1f, 0, 0);
     XCylinder(ROD_RADIUS, 0.45f);
     glPopMatrix();
 
-    /******************************
-    *   I Hope the handle can rotate
-    *   about its mean position
-    *******************************/
     glPushMatrix();
-    glRotatef(-steering, 1.0f, 0.0f, 0.0f);
-    /******************************
-    *   Roll back to the height of
-    *   the handle to draw it
-    *******************************/
-    glTranslatef(-0.3f, 0.0f, 0.0f);
+    glRotatef(-steering, 1, 0, 0);
 
-    /********************************
-    *   We cannot use the incline
-    *   the incline to draw the
-    *   horizontal part of the rod
-    ********************************/
-    glPushMatrix();
-    glRotatef(FRONT_INCLINE, 0.0f, 0.0f, 1.0f);
+    glTranslatef(-0.3f, 0, 0);
 
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -HANDLE_ROD / 2);
+    glRotatef(FRONT_INCLINE, 0, 0, 1);
+
+    glPushMatrix();
+    glTranslatef(0, 0, -HANDLE_ROD / 2);
     ZCylinder(ROD_RADIUS, HANDLE_ROD);
     glPopMatrix();
 
     glPushMatrix();
-    glColor3f(1.0f, 1.0f, 0.0f);
-    glTranslatef(0.0f, 0.0f, -HANDLE_ROD / 2);
+    glColor3f(1, 1, 0);
+    glTranslatef(0, 0, -HANDLE_ROD / 2);
     ZCylinder(0.07f, HANDLE_ROD / 4);
-    glTranslatef(0.0f, 0.0f, HANDLE_ROD * 3 / 4);
+    glTranslatef(0, 0, HANDLE_ROD * 3 / 4);
     ZCylinder(0.07f, HANDLE_ROD / 4);
-    glColor3f(1.0f, 0.0f, 0.0f);
+    glColor3f(1, 0, 0);
     glPopMatrix();
     glPopMatrix();
 
-    /*********************************
-    *   Using this incline now draw
-    *   the handle.Maybe use this again
-    *   to draw the wheel. ;)
-    **********************************/
     glPushMatrix();
-    /****************************
-    *   Draw the main big rod
-    ****************************/
+
     XCylinder(ROD_RADIUS, CRANK_ROD);
 
-    /******************************
-    *   Why not draw the two rods and
-    *   the WHEEL?   :)
-    *   Yes!So,first go to the
-    *   end of the main rod.
-    *******************************/
-    glTranslatef(CRANK_ROD, 0.0f, 0.0f);
-    glRotatef(CRANK_ANGLE, 0.0f, 0.0f, 1.0f);
+    glTranslatef(CRANK_ROD, 0, 0);
+    glRotatef(CRANK_ANGLE, 0, 0, 1);
 
-    /*******************************
-    *   Draw the two rods connecting
-    *   the handle and the front
-    *   wheel.
-    *   The two rods are at a incline
-    *   to the connector.
-    ********************************/
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, WHEEL_OFFSET);
+    glTranslatef(0, 0, WHEEL_OFFSET);
+    glRotatef(-5.0f, 0, 1, 0);
     XCylinder(ROD_RADIUS, CRANK_RODS);
     glPopMatrix();
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -WHEEL_OFFSET);
+    glTranslatef(0, 0, -WHEEL_OFFSET);
+    glRotatef(5.0f, 0, 1, 0);
     XCylinder(ROD_RADIUS, CRANK_RODS);
     glPopMatrix();
-    /********************************
- *   Why not draw the wheel.
- *   The FRONT wheel to be precise
- *********************************/
-    glTranslatef(CRANK_RODS, 0.0f, 0.0f);
-    glRotatef(-2 * pedalAngle, 0.0f, 0.0f, 1.0f);
+
+    glPushMatrix();
+    glRotatef(90, 0, 1, 0);
+    glTranslatef(-0.15f, 0, 0);
+    XCylinder(ROD_RADIUS, 0.3);
+    glPopMatrix();
+
+    glTranslatef(CRANK_RODS, 0, 0);
+    glRotatef(-2 * pedalAngle, 0, 0, 1);
     drawTyre();
     glPopMatrix();
-    glPopMatrix();   /*   End of the rotation of the handle effect   */
+    glPopMatrix();
     glPopMatrix();
 }
 
@@ -458,8 +289,8 @@ void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width, GLint teeth
 
     da = 2.0 * M_PI / teeth / 4.0;
 
-    glTranslatef(0.0f, 0.0f, 0.12f);
-    glColor3f(0.0f, 0.0f, 0.0f);
+    glTranslatef(0, 0, 0.12f);
+    glColor3f(0, 0, 0);
 
     glShadeModel(GL_FLAT);
 
@@ -559,8 +390,8 @@ void drawChain() {
     GLfloat depth;
     static int mode = 0;
 
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glTranslatef(0.0f, 0.0f, 0.1f);
+    glColor3f(0, 0, 0);
+    glTranslatef(0, 0, 0.1f);
     glEnable(GL_LINE);
     mode = (mode + 1) % 2;
 
@@ -570,180 +401,181 @@ void drawChain() {
     glBegin(GL_LINES);
     for (depth = 0.06f; depth <= 0.12f; depth += 0.01f) {
         glVertex3f(-1.6f, 0.15f, ROD_RADIUS);
-        glVertex3f(0.0f, 0.3f, depth);
+        glVertex3f(0, 0.3f, depth);
 
         glVertex3f(-1.6f, -0.15f, ROD_RADIUS);
-        glVertex3f(0.0f, -0.3f, depth);
+        glVertex3f(0, -0.3f, depth);
     }
     glEnd();
     glDisable(GL_LINE_STIPPLE);
-    glTranslatef(0.0f, 0.0f, -0.1f);
+    glTranslatef(0, 0, -0.1f);
 }
 
 void drawSeat() {
 
     glBegin(GL_POLYGON);
-    glVertex3f(-0.1f, 1.0f, -0.5f);
-    glVertex3f(1.0f, 1.0f, -0.3f);
-    glVertex3f(1.1f, 1.0f, -0.1f);
-    glVertex3f(1.1f, 1.0f, 0.1f);
-    glVertex3f(1.0f, 1.0f, 0.3f);
-    glVertex3f(-0.1f, 1.0f, 0.5f);
-    glVertex3f(-0.5f, 1.0f, 1.0f);
-    glVertex3f(-0.6f, 1.0f, 1.1f);
-    glVertex3f(-0.7f, 1.0f, 1.2f);
-    glVertex3f(-0.8f, 1.0f, 1.2f);
-    glVertex3f(-0.9f, 1.0f, 1.1f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-0.9f, 1.0f, -1.1f);
-    glVertex3f(-0.8f, 1.0f, -1.2f);
-    glVertex3f(-0.7f, 1.0f, -1.2f);
-    glVertex3f(-0.6f, 1.0f, -1.1f);
-    glVertex3f(-0.5f, 1.0f, -1.0f);
+    glVertex3f(-0.1f, 1, -0.5f);
+    glVertex3f(1, 1, -0.3f);
+    glVertex3f(1.1f, 1, -0.1f);
+    glVertex3f(1.1f, 1, 0.1f);
+    glVertex3f(1, 1, 0.3f);
+    glVertex3f(-0.1f, 1, 0.5f);
+    glVertex3f(-0.5f, 1, 1);
+    glVertex3f(-0.6f, 1, 1.1f);
+    glVertex3f(-0.7f, 1, 1.2f);
+    glVertex3f(-0.8f, 1, 1.2f);
+    glVertex3f(-0.9f, 1, 1.1f);
+    glVertex3f(-1, 1, 1);
+    glVertex3f(-1, 1, -1);
+    glVertex3f(-0.9f, 1, -1.1f);
+    glVertex3f(-0.8f, 1, -1.2f);
+    glVertex3f(-0.7f, 1, -1.2f);
+    glVertex3f(-0.6f, 1, -1.1f);
+    glVertex3f(-0.5f, 1, -1);
     glEnd();
 
     glBegin(GL_POLYGON);
-    glVertex3f(-0.1f, -1.0f, -0.5f);
-    glVertex3f(1.0f, -1.0f, -0.3f);
-    glVertex3f(1.1f, -1.0f, -0.1f);
-    glVertex3f(1.1f, -1.0f, 0.1f);
-    glVertex3f(1.0f, -1.0f, 0.3f);
-    glVertex3f(-0.1f, -1.0f, 0.5f);
-    glVertex3f(-0.5f, -1.0f, 1.0f);
-    glVertex3f(-0.6f, -1.0f, 1.1f);
-    glVertex3f(-0.7f, -1.0f, 1.2f);
-    glVertex3f(-0.8f, -1.0f, 1.2f);
-    glVertex3f(-0.9f, -1.0f, 1.1f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-0.9f, -1.0f, -1.1f);
-    glVertex3f(-0.8f, -1.0f, -1.2f);
-    glVertex3f(-0.7f, -1.0f, -1.2f);
-    glVertex3f(-0.6f, -1.0f, -1.1f);
-    glVertex3f(-0.5f, -1.0f, -1.0f);
+    glVertex3f(-0.1f, -1, -0.5f);
+    glVertex3f(1, -1, -0.3f);
+    glVertex3f(1.1f, -1, -0.1f);
+    glVertex3f(1.1f, -1, 0.1f);
+    glVertex3f(1, -1, 0.3f);
+    glVertex3f(-0.1f, -1, 0.5f);
+    glVertex3f(-0.5f, -1, 1);
+    glVertex3f(-0.6f, -1, 1.1f);
+    glVertex3f(-0.7f, -1, 1.2f);
+    glVertex3f(-0.8f, -1, 1.2f);
+    glVertex3f(-0.9f, -1, 1.1f);
+    glVertex3f(-1, -1, 1);
+    glVertex3f(-1, -1, -1);
+    glVertex3f(-0.9f, -1, -1.1f);
+    glVertex3f(-0.8f, -1, -1.2f);
+    glVertex3f(-0.7f, -1, -1.2f);
+    glVertex3f(-0.6f, -1, -1.1f);
+    glVertex3f(-0.5f, -1, -1);
     glEnd();
 
     glBegin(GL_QUADS);
-    glVertex3f(1.0f, 1.0f, -0.3f);
-    glVertex3f(1.0f, 1.0f, 0.3f);
-    glVertex3f(1.0f, -1.0f, 0.3f);
-    glVertex3f(1.0f, -1.0f, -0.3f);
+    glVertex3f(1, 1, -0.3f);
+    glVertex3f(1, 1, 0.3f);
+    glVertex3f(1, -1, 0.3f);
+    glVertex3f(1, -1, -0.3f);
 
-    glVertex3f(1.0f, 1.0f, 0.3f);
-    glVertex3f(-0.1f, 1.0f, 0.5f);
-    glVertex3f(-0.1f, -1.0f, 0.5f);
-    glVertex3f(1.0f, -1.0f, 0.3f);
+    glVertex3f(1, 1, 0.3f);
+    glVertex3f(-0.1f, 1, 0.5f);
+    glVertex3f(-0.1f, -1, 0.5f);
+    glVertex3f(1, -1, 0.3f);
 
-    glVertex3f(1.0f, 1.0f, -0.3f);
-    glVertex3f(-0.1f, 1.0f, -0.5f);
-    glVertex3f(-0.1f, -1.0f, -0.5f);
-    glVertex3f(1.0f, -1.0f, -0.3f);
+    glVertex3f(1, 1, -0.3f);
+    glVertex3f(-0.1f, 1, -0.5f);
+    glVertex3f(-0.1f, -1, -0.5f);
+    glVertex3f(1, -1, -0.3f);
 
-    glVertex3f(-0.1f, 1.0f, 0.5f);
-    glVertex3f(-0.5f, 1.0f, 1.0f);
-    glVertex3f(-0.5f, -1.0f, 1.0f);
-    glVertex3f(-0.1f, -1.0f, 0.5f);
+    glVertex3f(-0.1f, 1, 0.5f);
+    glVertex3f(-0.5f, 1, 1);
+    glVertex3f(-0.5f, -1, 1);
+    glVertex3f(-0.1f, -1, 0.5f);
 
-    glVertex3f(-0.1f, 1.0f, -0.5f);
-    glVertex3f(-0.5f, 1.0f, -1.0f);
-    glVertex3f(-0.5f, -1.0f, -1.0f);
-    glVertex3f(-0.1f, -1.0f, -0.5f);
+    glVertex3f(-0.1f, 1, -0.5f);
+    glVertex3f(-0.5f, 1, -1);
+    glVertex3f(-0.5f, -1, -1);
+    glVertex3f(-0.1f, -1, -0.5f);
 
-    glVertex3f(-0.5f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(-0.5f, -1.0f, 1.0f);
+    glVertex3f(-0.5f, 1, 1);
+    glVertex3f(-1, 1, 1);
+    glVertex3f(-1, -1, 1);
+    glVertex3f(-0.5f, -1, 1);
 
-    glVertex3f(-0.5f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-0.5f, -1.0f, -1.0f);
+    glVertex3f(-0.5f, 1, -1);
+    glVertex3f(-1, 1, -1);
+    glVertex3f(-1, -1, -1);
+    glVertex3f(-0.5f, -1, -1);
 
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
+    glVertex3f(-1, 1, 1);
+    glVertex3f(-1, 1, -1);
+    glVertex3f(-1, -1, -1);
+    glVertex3f(-1, -1, 1);
 
     glEnd();
 }
 
 void drawPedals() {
-    glColor3f(0.0f, 0.0f, 0.0f);
+    glColor3f(0, 0, 0);
 
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.105f);
-    glRotatef(-pedalAngle, 0.0f, 0.0f, 1.0f);
-    glTranslatef(0.25f, 0.0f, 0.15f);
-
-    glPushMatrix();
-    glScalef(0.5f, 0.05f, 0.1f);
-    glutSolidCube(1.0f);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.25f, 0.0f, 0.15f);
-    glRotatef(pedalAngle, 0.0f, 0.0f, 1.0f);
-    glScalef(0.2f, 0.08f, 0.3f);
-    glutSolidCube(1.0f);
-    glPopMatrix();
-
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -0.23f);
-    glRotatef(180.0f - pedalAngle, 0.0f, 0.0f, 1.0f);
-    glTranslatef(0.25f, 0.0f, 0.0f);
+    glTranslatef(0, 0, 0.105f);
+    glRotatef(-pedalAngle, 0, 0, 1);
+    glTranslatef(0.25f, 0, 0.15f);
 
     glPushMatrix();
     glScalef(0.5f, 0.05f, 0.1f);
-    glutSolidCube(1.0f);
+    glutSolidCube(1);
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(0.25f, 0.0f, -0.15f);
-    glRotatef(pedalAngle - 180.0f, 0.0f, 0.0f, 1.0f);
+    glTranslatef(0.25f, 0, 0.15f);
+    glRotatef(pedalAngle, 0, 0, 1);
     glScalef(0.2f, 0.08f, 0.3f);
-    glutSolidCube(1.0f);
+    glutSolidCube(1);
     glPopMatrix();
 
     glPopMatrix();
 
-    glColor3f(1.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glTranslatef(0, 0, -0.23f);
+    glRotatef(180 - pedalAngle, 0, 0, 1);
+    glTranslatef(0.25f, 0, 0);
+
+    glPushMatrix();
+    glScalef(0.5f, 0.05f, 0.1f);
+    glutSolidCube(1);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.25f, 0, -0.15f);
+    glRotatef(pedalAngle - 180, 0, 0, 1);
+    glScalef(0.2f, 0.08f, 0.3f);
+    glutSolidCube(1);
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glColor3f(1, 0, 0);
 }
 
 void drawTyre() {
 
-    glColor3f(0.0f, 0.0f, 0.0f);
+    glColor3f(0, 0, 0);
     glutSolidTorus(0.06f, 0.92f, 4, 30);
 
-    glColor3f(0.0f, 0.0f, 0.0f);
+    glColor3f(0, 0, 0);
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -0.06f);
-    ZCylinder(0.08f, 0.12f);
+    glTranslatef(0, 0, -0.25f);
+    ZCylinder(0.08f, 0.5f);
     glPopMatrix();
     glutSolidTorus(0.08f, 0.05f, 3, 20);
 
-    glColor3f(0.0f, 0.0f, 1.0f);
+    glColor3f(0, 0, 1);
     for (int i = 0; i < SPOKES_COUNT; ++i) {
         glPushMatrix();
-        glRotatef(i * SPOKE_ANGLE, 0.0f, 0.0f, 1.0f);
+        glRotatef(i * SPOKE_ANGLE, 0, 0, 1);
+        glColor3f(0, 0, 0);
         glLineWidth(2.0f);
         glBegin(GL_LINES);
-        glVertex3f(0.0f, 0.02f, 0.0f);
-        glVertex3f(0.0f, 0.86f, 0.0f);
+        glVertex3f(0, 0.02f, 0);
+        glVertex3f(0, 0.86f, 0);
         glEnd();
         glPopMatrix();
     }
 
-    glColor3f(0.0f, 0.0f, 0.0f);
+    glColor3f(0, 0, 0);
     glutSolidTorus(TUBE_WIDTH, WHEEL_RADIUS, 10, 30);
-    glColor3f(1.0f, 0.0f, 0.0f);
+    glColor3f(1, 0, 0);
 }
 
 void init() {
+    GLfloat light[] = {1.0, 1.0, 1.0};
     GLfloat mat_shininess[] = {100.0};
-    GLfloat light_diffuse[] = {1.0, 1.0, 1.0};
     GLfloat mat_specular[] = {1.0, 1.0, 1.0, 1.0};
     GLfloat light_directional[] = {1.0, 1.0, 1.0, 1.0};
 
@@ -751,38 +583,41 @@ void init() {
 
     glShadeModel(GL_SMOOTH);
 
-    glLightfv(GL_LIGHT0, GL_POSITION, light_directional);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_diffuse);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT5, GL_AMBIENT, light);
+    glLightfv(GL_LIGHT5, GL_DIFFUSE, light);
+    glLightfv(GL_LIGHT5, GL_SPECULAR, light);
+    glLightfv(GL_LIGHT5, GL_EMISSION, light_directional);
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glColorMaterial(GL_FRONT, GL_DIFFUSE);
 
+    glEnable(GL_LIGHT5);
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_COLOR_MATERIAL);
 }
 
 void landmarks() {
-    GLfloat i;
-    glColor3f(0.0f, 1.0f, 0.0f);
+    glDisable(GL_LIGHTING);
 
-    /************************************
-    *   Draw the ground for the cycle
-    *   Looks incomplete with it!Don't
-    *   forget to define the normal
-    *   vectors for the vertices.
-    *   gotta fix this bug!
-    ************************************/
-    glBegin(GL_LINES);
-    for (i = -100.0f; i < 100.0f; i += 1.0f) {
-        glVertex3f(-100.0f, -WHEEL_RADIUS, i);
-        glVertex3f(100.0f, -WHEEL_RADIUS, i);
-        glVertex3f(i, -WHEEL_RADIUS, -100.0f);
-        glVertex3f(i, -WHEEL_RADIUS, 100.0f);
-    }
+    glColor3f(0, 1, 0);
+
+    glBegin(GL_QUADS);
+    glVertex3f(100, -WHEEL_RADIUS, 100);
+    glVertex3f(-100, -WHEEL_RADIUS, 100);
+    glVertex3f(-100, -WHEEL_RADIUS, -100);
+    glVertex3f(100, -WHEEL_RADIUS, -100);
     glEnd();
+
+    glPushMatrix();
+    glColor3f(1,1,0);
+    GLUquadric *quad;
+    quad = gluNewQuadric();
+    glTranslatef(20,20,0);
+    gluSphere(quad,1,100,20);
+    glPopMatrix();
+
+    glEnable(GL_LIGHTING);
 }
 
 void display() {
@@ -790,29 +625,16 @@ void display() {
     glEnable(GL_NORMALIZE);
 
     glPushMatrix();
-    /*******************************
-     *    Prepare the rotations
-     *    and start doing the
-     *    remaining scene
-     *******************************/
-    glRotatef(camAngleY, 1.0f, 0.0f, 0.0f);
-    glRotatef(camAngleX, 0.0f, 1.0f, 0.0f);
-    glRotatef(camAngleZ, 0.0f, 0.0f, 1.0f);
 
-    /***********************
-     *    Start rendering
-     *    the scene;
-     *    the bicycle ;)
-     **********************/
+    glRotatef(camAngleY, 1, 0, 0);
+    glRotatef(camAngleX, 0, 1, 0);
+    glRotatef(camAngleZ, 0, 0, 1);
 
     landmarks();
 
-    /****************************
-    *   Move the cycle.
-    ****************************/
     glPushMatrix();
-    glTranslatef(bicyclePosX, 0.0f, bicyclePosY);
-    glRotatef(bicycleDirection, 0.0f, 1.0f, 0.0f);
+    glTranslatef(bicyclePosX, 0, bicyclePosY);
+    glRotatef(bicycleDirection, 0, 1, 0);
 
     drawFrame();
     drawChain();
@@ -828,35 +650,20 @@ void display() {
     glutSwapBuffers();
 }
 
-/************************
-*   Returns the value of
-*   the given angle in
-*   degrees
-************************/
-GLfloat degrees(GLfloat a) {
-    return a * 180.0f / M_PI;
+GLfloat radToDeg(GLfloat rad) {
+    return rad * 180 / M_PI;
 }
 
-/************************
-*   Returns the value of
-*   the given angle in
-*   radians
-************************/
-GLfloat radians(GLfloat a) {
-    return a * M_PI / 180.0f;
+GLfloat degToRad(GLfloat deg) {
+    return deg * M_PI / 180;
 }
 
-/*************************
-*   The idle function of
-*   the program which makes
-*   the contniuous loop
-***************************/
 void idle() {
     updateScene();
     glutPostRedisplay();
 }
 
-void special(int key, int x, int y) {
+void keyboardKey(int key, int x, int y) {
     switch (key) {
         case GLUT_KEY_UP:
             camPosZ -= 0.1f;
@@ -881,21 +688,21 @@ void special(int key, int x, int y) {
 }
 
 void reset() {
-    camAngleX = 0.0f;
-    camAngleY = 0.0f;
-    camAngleZ = 0.0f;
-    pedalAngle = 0.0f;
-    steering = 0.0f;
+    camAngleX = 0;
+    camAngleY = 0;
+    camAngleZ = 0;
+    pedalAngle = 0;
+    steering = 0;
     Mouse = GLUT_UP;
-    pedalAngle = 0.0f;
-    speed = 0.0f;
-    steering = 0.0f;
-    camPosX = 0.0f;
-    camPosY = 0.0f;
+    pedalAngle = 0;
+    speed = 0;
+    steering = 0;
+    camPosX = 0;
+    camPosY = 0;
     camPosZ = 5.0f;
-    bicyclePosX = 0.0f;
-    bicyclePosY = 0.0f;
-    bicycleDirection = 0.0f;
+    bicyclePosX = 0;
+    bicyclePosY = 0;
+    bicycleDirection = 0;
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -927,43 +734,32 @@ void keyboard(unsigned char key, int x, int y) {
     }
 
     pedalAngle += speed;
-    if (speed < 0.0f) speed = 0.0f;
-    if (pedalAngle < 0.0f) pedalAngle = 0.0f;
-    if (pedalAngle >= 360.0f) pedalAngle -= 360.0f;
+    if (speed < 0) speed = 0;
+    if (pedalAngle < 0) pedalAngle = 0;
+    if (pedalAngle >= 360) pedalAngle -= 360;
 
     glutPostRedisplay();
 }
 
 void mouse(int button, int state, int x, int y) {
-    switch (button) {
-        case GLUT_LEFT_BUTTON:
-            if (state == GLUT_DOWN) {
-                Mouse = GLUT_DOWN;
-                mousePrevX = x;
-                mousePrevY = y;
-            }
-            if (state == GLUT_UP) {
-                Mouse = GLUT_UP;
-            }
-            break;
-        case GLUT_RIGHT_BUTTON:
-            /*   DO NOTHING   */
-            break;
+    if (button == GLUT_LEFT_BUTTON){
+        if (state == GLUT_UP) Mouse = GLUT_UP;
+        if (state == GLUT_DOWN) {
+            Mouse = GLUT_DOWN;
+            mousePrevX = x;
+            mousePrevY = y;
+        }
     }
     glutPostRedisplay();
 }
 
-void passive(int x, int y) {
-/*   DO NOTHING   */
-}
-
 void motion(int x, int y) {
     if (Mouse == GLUT_DOWN) {
-        int deltax, deltay;
-        deltax = mousePrevX - x;
-        deltay = mousePrevY - y;
-        camAngleX += 0.5 * deltax;
-        camAngleY += 0.5 * deltay;
+        int deltaX, deltaY;
+        deltaX = mousePrevX - x;
+        deltaY = mousePrevY - y;
+        camAngleX += 0.5 * deltaX;
+        camAngleY += 0.5 * deltaY;
     } else {
         Mouse = GLUT_UP;
     }
@@ -976,22 +772,20 @@ void reshape(int w, int h) {
     glViewport(0, 0, (GLsizei) w, (GLsizei) h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat) w / (GLfloat) h, 0.1, 100.0);
-    //Angle,Aspect Ratio,near plane,far plane
+    gluPerspective(100.0, (GLfloat) w / (GLfloat) h, 0.1, 100.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(camPosX, camPosY, camPosZ, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt(camPosX, camPosY, camPosZ, camPosX, camPosY, 0.0, 0.0, 1.0, 0.0);
 }
 
 void setupCallBacks() {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutIdleFunc(idle);
-    glutSpecialFunc(special);
+    glutSpecialFunc(keyboardKey);
     glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
-    glutPassiveMotionFunc(passive);
     glutSetCursor(GLUT_CURSOR_CROSSHAIR);
 }
 
