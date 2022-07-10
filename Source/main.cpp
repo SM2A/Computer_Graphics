@@ -561,7 +561,7 @@ void init() {
     glLightfv(GL_LIGHT5, GL_AMBIENT, light);
     glLightfv(GL_LIGHT5, GL_DIFFUSE, light);
     glLightfv(GL_LIGHT5, GL_SPECULAR, light);
-    glLightfv(GL_LIGHT5, GL_EMISSION, light_directional);
+    glLightfv(GL_LIGHT5, GL_POSITION, light_directional);
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glColorMaterial(GL_FRONT, GL_DIFFUSE);
