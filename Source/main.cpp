@@ -213,9 +213,28 @@ void drawFrame() {
     glColor3f(1, 0, 0);
     glTranslatef(0, 0, -HANDLE_ROD / 2);
     ZCylinder(0.07f, HANDLE_ROD / 4);
+
+    glColor3f(0, 0, 0);
+
+    glPushMatrix();
+    glTranslatef(0.07,0,0.47);
+    glutSolidCube(0.1);
+    glTranslatef(0.07,0,-0.37);
+    ZCylinder(0.02, HANDLE_ROD / 4);
+    glPopMatrix();
+
+    glColor3f(1, 0, 0);
+
     glTranslatef(0, 0, HANDLE_ROD * 3 / 4);
     ZCylinder(0.07f, HANDLE_ROD / 4);
     glColor3f(0, 0, 0);
+
+    glPushMatrix();
+    glTranslatef(0.07,0,-0.05);
+    glutSolidCube(0.1);
+    glTranslatef(0.07,0,-0.05);
+    ZCylinder(0.02, HANDLE_ROD / 4);
+    glPopMatrix();
 
     glPopMatrix();
     glPopMatrix();
@@ -590,9 +609,17 @@ void landmarks() {
     glColor3f(1,1,0);
     GLUquadric *quad;
     quad = gluNewQuadric();
-    glTranslatef(20,20,0);
+    glTranslatef(20,20,20);
     gluSphere(quad,1,100,20);
     glPopMatrix();
+
+    /*glPushMatrix();
+    glColor3f(0.6,0.4,0.2);
+    GLUquadric *quad1;
+    quad1 = gluNewQuadric();
+    glTranslatef(-50,-20,20);
+    gluSphere(quad1,30,100,20);
+    glPopMatrix();*/
 
     glEnable(GL_LIGHTING);
 }
