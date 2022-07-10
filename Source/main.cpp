@@ -118,7 +118,7 @@ void drawFrame() {
     gear(0.08f, 0.3f, 0.03f, 30, 0.03f);
     glPopMatrix();
 
-    glColor3f(1, 0, 0);
+    glColor3f(1, 1, 1);
     glTranslatef(0, 0, -0.25f);
     ZCylinder(0.08f, 0.47f);
     glPopMatrix();
@@ -133,9 +133,11 @@ void drawFrame() {
     glTranslatef(MIDDLE_ROD, 0, 0);
     glRotatef(-MIDDLE_ANGLE, 0, 0, 1);
     glScalef(0.3f, ROD_RADIUS, 0.25f);
+
+    glColor3f(0, 0, 0);
     drawSeat();
 
-    glColor3f(1, 0, 0);
+    glColor3f(0.439, 0, 0.658);
     glPopMatrix();
 
     glPushMatrix();
@@ -159,13 +161,13 @@ void drawFrame() {
     glPushMatrix();
     glRotatef(-2 * pedalAngle, 0, 0, 1);
     drawTyre();
-    glColor3f(0, 1, 0);
     gear(0.03f, 0.15f, 0.03f, 20, 0.03f);
-    glColor3f(1, 0, 0);
+    glColor3f(1, 0.64, 0.168);
     glPopMatrix();
     glRotatef(LEFT_ANGLE, 0, 0, 1);
 
     glPushMatrix();
+    glColor3f(0.439, 0, 0.658);
     glTranslatef(0, 0, -WHEEL_OFFSET-0.1);
     glRotatef(-6.5f, 0, 1, 0);
     XCylinder(ROD_RADIUS, WHEEL_LEN+0.7);
@@ -180,6 +182,7 @@ void drawFrame() {
 
     glTranslatef(CRANK_ROD, 0, 0);
     glRotatef(-LEFT_ANGLE, 0, 0, 1);
+    glColor3f(1, 1, 1);
     XCylinder(ROD_RADIUS, TOP_LEN);
 
     glTranslatef(TOP_LEN, 0, 0);
@@ -200,16 +203,18 @@ void drawFrame() {
 
     glPushMatrix();
     glTranslatef(0, 0, -HANDLE_ROD / 2);
+    glColor3f(0, 0, 0);
     ZCylinder(ROD_RADIUS, HANDLE_ROD);
     glPopMatrix();
 
     glPushMatrix();
-    glColor3f(1, 1, 0);
+    glColor3f(1, 0, 0);
     glTranslatef(0, 0, -HANDLE_ROD / 2);
     ZCylinder(0.07f, HANDLE_ROD / 4);
     glTranslatef(0, 0, HANDLE_ROD * 3 / 4);
     ZCylinder(0.07f, HANDLE_ROD / 4);
-    glColor3f(1, 0, 0);
+    glColor3f(0, 0, 0);
+
     glPopMatrix();
     glPopMatrix();
 
@@ -221,6 +226,7 @@ void drawFrame() {
     glRotatef(CRANK_ANGLE, 0, 0, 1);
 
     glPushMatrix();
+    glColor3f(0.439, 0, 0.658);
     glTranslatef(0, 0, WHEEL_OFFSET);
     glRotatef(-5.0f, 0, 1, 0);
     XCylinder(ROD_RADIUS, CRANK_RODS);
