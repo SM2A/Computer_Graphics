@@ -236,6 +236,17 @@ void drawFrame() {
     ZCylinder(0.02, HANDLE_ROD / 4);
     glPopMatrix();
 
+    glColor3f(1, 1, 1);
+
+    glPushMatrix();
+    glTranslatef(0,0.05,-0.07);
+    GLUquadric *quad;
+    quad = gluNewQuadric();
+    gluSphere(quad,0.05,100,20);
+    glPopMatrix();
+
+    glColor3f(1, 1, 1);
+
     glPopMatrix();
     glPopMatrix();
 
@@ -252,6 +263,7 @@ void drawFrame() {
     glRotatef(-5.0f, 0, 1, 0);
     XCylinder(ROD_RADIUS, CRANK_RODS);
     glPopMatrix();
+
     glPushMatrix();
     glTranslatef(0, 0, -WHEEL_OFFSET);
     glRotatef(5.0f, 0, 1, 0);
