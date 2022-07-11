@@ -772,7 +772,7 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'h':
         case 'H':
-            PlaySound(TEXT("../Resource/ring.wav"), NULL, SND_FILENAME);
+            PlaySound(TEXT("../Resource/ring.wav"), NULL, SND_ASYNC);
             break;
         case 27:
             exit(1);
