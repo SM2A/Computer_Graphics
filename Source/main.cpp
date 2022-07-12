@@ -847,4 +847,5 @@ void printInstruction() {
     cout << "'R' to reset the scene" << endl;
     cout << "Arrow keys to move the camera" << endl;
     cout << "Mouse to move the scene" << endl;
+    cout << "Esc to exit" << endl;
 }
