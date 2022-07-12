@@ -839,7 +839,6 @@ void setupCallBacks() {
 void printInstruction() {
     cout << "CG-2022" << endl;
     cout << "Seyed Mohammad Amin Atyabi" << endl;
-    cout << "810198559" << endl;
     cout << "'A' to increase the speed" << endl;
     cout << "'S' to decrease the speed" << endl;
     cout << "'D' to turn right" << endl;
