@@ -47,4 +47,6 @@ Or if using `PowerShell`:
 .\build.bat
 ```
 
+By running script above executable file will appear in project root directory.
+
 Enjoy :)
