@@ -2,7 +2,7 @@
 
 This repository contains my Computer Graphics Course Project (Spring 2022) at University of Tehran.
 
-![Bicycle](https://raw.githubusercontent.com/SM2A/Computer_Graphics/master/Resource/Banner.png?token=GHSAT0AAAAAABTS3IJUA57MG66CX35CNLP6YWNSAYQ)
+![Bicycle](https://raw.githubusercontent.com/SM2A/Computer_Graphics/refs/heads/master/Resource/Banner.png)
 
 #### Requirements
 
